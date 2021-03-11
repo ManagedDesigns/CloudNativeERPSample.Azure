@@ -355,3 +355,4 @@ src/SampleApp.LiteBot/appSettings.Production.json
 src/SampleApp.WebApp/appSettings.Development.json
 src/SampleApp.WebApp/appSettings.Production.json
 /src/SampleApp.WebApp/.local-chromium/Win64-706915/chrome-win
+/src/SampleApp.WebApp/Properties/ServiceDependencies/sampleapp42 - Web Deploy

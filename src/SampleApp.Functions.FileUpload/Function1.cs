@@ -1,12 +1,10 @@
 using System;
-using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using Microsoft.Azure.WebJobs;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.WebJobs.Extensions.Http;
 using Azure.Storage.Blobs.Models;
 using Azure.Storage.Blobs;
 using SampleApp.Services.OCR;
@@ -25,7 +23,7 @@ namespace SampleApp.Functions.FileUpload
             try
             {
                 await UploadFileToBlobStorage(req, log);
-                await RegisterOutgoingInvoice(req, log);
+                //await RegisterOutgoingInvoice(req, log);
                 return new OkResult();
             }
             catch (Exception e)
@@ -37,8 +35,8 @@ namespace SampleApp.Functions.FileUpload
 
         private static async Task UploadFileToBlobStorage(HttpRequest req, ILogger log)
         {
-            string connectionString = "";
-            string containerName = "invoices";
+            string connectionString = GetEnvironmentVariable("StorageAccountConnectionString", log);//; "DefaultEndpointsProtocol=https;AccountName=sampleapp42;AccountKey=SfFXkI0m33kQfXU0d4SDqcac9hjugY3zXwe7e2taGATlMzPtA/Y6JbjYjfgwl8IsGHvr9B8O2SZGlq3whCz/7A==;EndpointSuffix=core.windows.net";
+            string containerName = GetEnvironmentVariable("StorageAccountInvoicesContainerName", log); //"invoices";
             var fileName = req.Form.Files[0].FileName;
             var container = new BlobContainerClient(connectionString, containerName);
             var blob = container.GetBlobClient(fileName);
@@ -60,6 +58,14 @@ namespace SampleApp.Functions.FileUpload
             var recognizer = new Recognizer(subscriptionKey, endpoint, trainingUrl);
             var result = await recognizer.RecognizeForm(req.Body);
             log.LogInformation($"OCR completed");
+        }
+
+        private static string GetEnvironmentVariable(string name, ILogger log)
+        {
+            var variable = System.Environment.GetEnvironmentVariable(name, EnvironmentVariableTarget.Process);
+
+            log.LogInformation($"{name}: {variable}");
+            return variable;            
         }
     }
 }
