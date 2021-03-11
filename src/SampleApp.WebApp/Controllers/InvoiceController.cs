@@ -142,9 +142,10 @@ namespace SampleApp.Controllers
         }
 
         [HttpPost]
-        public void Upload(IFormFile file, [FromServices] AccountancyServices accountancyServices)
+        public IActionResult Upload(IFormFile file, [FromServices] AccountancyServices accountancyServices)
         {
             accountancyServices.SavePDF(file);
+            return Redirect("/Invoice");
         }
     }
 }
