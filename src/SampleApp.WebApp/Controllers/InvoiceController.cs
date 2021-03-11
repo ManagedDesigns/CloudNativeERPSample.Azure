@@ -119,6 +119,23 @@ namespace SampleApp.Controllers
         }
 
         [HttpGet]
+        public IActionResult Register()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Register(Invoice model, [FromServices] AccountancyServices accountancyServices)
+        {
+            if (!this.ModelState.IsValid)
+                return View(model);
+
+            accountancyServices.RegisterInvoice(model);
+
+            return RedirectToAction(nameof(InvoiceController.Index));
+        }
+
+        [HttpGet]
         public IActionResult Upload()
         {
             return View();

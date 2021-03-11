@@ -7,10 +7,12 @@
 
 <h1>Index</h1>
 
-<p>
-    <a asp-action="Issue">Issue New</a> <a asp-action="Upload">Upload</a>
-</p>
-<div class="row">
+<ul class="list-inline">
+    <li class="list-inline-item"><a asp-action="Issue">Issue New</a></li>
+    <li class="list-inline-item"><a asp-action="Register">Register</a></li>
+    <li class="list-inline-item"><a asp-action="Upload">Upload</a></li>    
+</ul>
+<div class="container row">
     <form asp-action="Index">
         <div class="form-group row">
             <label asp-for="CustomerName" class="col-sm-2 col-form-label"></label>

@@ -24,11 +24,5 @@
     <ProjectReference Include="..\SampleApp.Data\SampleApp.Data.csproj" />
     <ProjectReference Include="..\SampleApp.Services.Search\SampleApp.Services.Search.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Update="appsettings - Copy.Production.json">
-      <DependentUpon>appsettings.Production.json</DependentUpon>
-    </Content>
-  </ItemGroup>
 </Project>
  

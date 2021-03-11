@@ -42,6 +42,22 @@ namespace SampleApp.Services
             }
         }
 
+        public void RegisterInvoice(Invoice invoice)
+        {
+            if (_database.Invoices.Any(i => i.Number == invoice.Number))
+                throw new ArgumentException("Invoice number already exists");
+
+            try
+            {
+                _database.Invoices.Add(invoice);
+                _database.SaveChanges();
+            }
+            finally
+            {
+
+            }
+        }
+
         public void SavePDF(IFormFile file)
         {
             UploadStreamToBlob(file.OpenReadStream(), file.FileName);
