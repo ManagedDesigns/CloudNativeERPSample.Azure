@@ -35,8 +35,8 @@ namespace SampleApp.Functions.FileUpload
 
         private static async Task UploadFileToBlobStorage(HttpRequest req, ILogger log)
         {
-            string connectionString = GetEnvironmentVariable("StorageAccountConnectionString", log);//; "DefaultEndpointsProtocol=https;AccountName=sampleapp42;AccountKey=SfFXkI0m33kQfXU0d4SDqcac9hjugY3zXwe7e2taGATlMzPtA/Y6JbjYjfgwl8IsGHvr9B8O2SZGlq3whCz/7A==;EndpointSuffix=core.windows.net";
-            string containerName = GetEnvironmentVariable("StorageAccountInvoicesContainerName", log); //"invoices";
+            string connectionString = GetEnvironmentVariable("StorageAccountConnectionString", log);
+            string containerName = GetEnvironmentVariable("StorageAccountInvoicesContainerName", log);
             var fileName = req.Form.Files[0].FileName;
             var container = new BlobContainerClient(connectionString, containerName);
             var blob = container.GetBlobClient(fileName);
