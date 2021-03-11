@@ -5,8 +5,13 @@
     <UserSecretsId>f9747020-55fc-4dc2-a2d8-e4a593558de4</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.29" />
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.4.2" />
+    <Compile Remove="Properties\**" />
+    <EmbeddedResource Remove="Properties\**" />
+    <None Remove="Properties\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.38" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.8.0" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">
@@ -16,9 +21,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>Never</CopyToPublishDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\PublishProfiles\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SampleApp.Data\SampleApp.Data.csproj" />

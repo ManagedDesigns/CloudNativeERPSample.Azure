@@ -10,6 +10,7 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using SampleApp.Services.Search;
+using iText.Kernel.Pdf;
 
 namespace SampleApp.Services
 {
@@ -49,12 +50,20 @@ namespace SampleApp.Services
         private void GeneratePDF(Invoice invoice)
         {
             string invoiceHtml = $"<div><p>Customer: {invoice.CustomerName}</p><p>Invoice # {invoice.Number}</p></div>";
-            string fileName = $@"{invoice.Id}.pdf";
+            string fileName = $@"{invoice.Number.Replace("/", "-")}.pdf";
+            try
+            {
+                using var workStream = new MemoryStream();
+                using var pdfWriter = new PdfWriter(workStream);
+                using var document = HtmlConverter.ConvertToDocument(invoiceHtml, pdfWriter);
+                document.Close();
+                using var blobStream = new MemoryStream(workStream.ToArray());
+                UploadStreamToBlob(blobStream, fileName);
+            }
+            catch
+            {
 
-            using MemoryStream fs = new MemoryStream();
-            HtmlConverter.ConvertToPdf(invoiceHtml, fs);
-
-            UploadStreamToBlob(fs, fileName);
+            }
         }
 
         private void UploadStreamToBlob(Stream stream, string fileName)

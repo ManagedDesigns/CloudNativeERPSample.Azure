@@ -16,7 +16,7 @@ namespace SampleApp.Services
 
         public string InvoiceUrl(string invoiceNumber)
         {
-            var fileName = invoiceNumber.Replace("/20", "-2K");
+            var fileName = invoiceNumber.Replace("/", "-");
             return $"{Configuration["StorageAccount:InvoicesContainerPath"]}/{fileName}.pdf";
         }
     }
