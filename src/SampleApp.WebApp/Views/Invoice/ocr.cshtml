@@ -1,0 +1,22 @@
+﻿@model Azure.AI.FormRecognizer.Models.RecognizedFormCollection
+@using Azure.AI.FormRecognizer.Models;
+@{
+    foreach (RecognizedForm form in Model)
+    {
+    <table class="table table-striped">
+        <tr>
+            <th>Field name</th>
+            <th>Value data</th>
+            <th>Confidence score</th>
+        </tr>
+        @foreach (FormField field in form.Fields.Values)
+        {
+            <tr>
+                <td>@field.Name</td>
+                <td>@field.ValueData?.Text</td>
+                <td>@field.Confidence</td>
+            </tr>
+        }
+    </table>
+    }
+}

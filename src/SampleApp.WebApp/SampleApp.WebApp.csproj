@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+	<PackageReference Include="Azure.AI.FormRecognizer" Version="3.1.1" />	  
     <PackageReference Include="Azure.Storage.Blobs" Version="12.8.0" />
     <PackageReference Include="itext7.pdfhtml" Version="3.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.4" />
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SampleApp.Data\SampleApp.Data.csproj" />
+    <ProjectReference Include="..\SampleApp.Services.OCR\SampleApp.Services.OCR.csproj" />
     <ProjectReference Include="..\SampleApp.Services.Search\SampleApp.Services.Search.csproj" />
   </ItemGroup>
 </Project>

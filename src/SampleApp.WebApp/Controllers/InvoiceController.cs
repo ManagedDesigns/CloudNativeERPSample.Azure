@@ -144,8 +144,9 @@ namespace SampleApp.Controllers
         [HttpPost]
         public IActionResult Upload(IFormFile file, [FromServices] AccountancyServices accountancyServices)
         {
-            accountancyServices.SavePDF(file);
-            return Redirect("/Invoice");
+            var model = accountancyServices.RegisterOutgoingInvoice(file);
+            
+            return View("ocr", model);
         }
     }
 }

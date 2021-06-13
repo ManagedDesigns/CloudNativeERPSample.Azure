@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using SampleApp.Data;
 using SampleApp.Services;
+using SampleApp.Services.OCR;
 using SampleApp.Services.Search;
 
 namespace SampleApp
@@ -28,6 +29,14 @@ namespace SampleApp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<Database>(options => options.UseSqlServer(Configuration["ConnectionString"]));
+
+            services.AddScoped<RecognizerConfig>((_) => new RecognizerConfig { 
+                Endpoint = Configuration["AzureFormRecognizer:Endpoint"],
+                Key = Configuration["AzureFormRecognizer:Key"],
+                ModelId = Configuration["AzureFormRecognizer:OutgoingInvoicesModelId"],
+                ModelUrl = Configuration["AzureFormRecognizer:OutgoingInvoicesModelUrl"]
+            });
+            services.AddScoped<Recognizer>();
 
             services.AddScoped<AccountancyServices>();
             services.AddScoped<UrlServices>();

@@ -23,7 +23,7 @@ namespace SampleApp.Functions.FileUpload
             try
             {
                 await UploadFileToBlobStorage(req, log);
-                //await RegisterOutgoingInvoice(req, log);
+                await RegisterOutgoingInvoice(req, log);
                 return new OkResult();
             }
             catch (Exception e)
@@ -55,8 +55,8 @@ namespace SampleApp.Functions.FileUpload
             var trainingUrl = "";
 
             log.LogInformation($"Starting OCR");
-            var recognizer = new Recognizer(subscriptionKey, endpoint, trainingUrl);
-            var result = await recognizer.RecognizeForm(req.Body);
+            //var recognizer = new Recognizer(subscriptionKey, endpoint, trainingUrl);
+            //var result = await recognizer.RecognizeForm(req.Body);
             log.LogInformation($"OCR completed");
         }
 

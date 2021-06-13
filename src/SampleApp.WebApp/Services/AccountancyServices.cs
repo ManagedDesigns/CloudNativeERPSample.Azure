@@ -11,6 +11,8 @@ using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Http;
 using SampleApp.Services.Search;
 using iText.Kernel.Pdf;
+using SampleApp.Services.OCR;
+using Azure.AI.FormRecognizer.Models;
 
 namespace SampleApp.Services
 {
@@ -18,11 +20,13 @@ namespace SampleApp.Services
     {
         private readonly IConfiguration _configuration;
         private readonly Database _database;
+        private readonly Recognizer _recognizer;
 
-        public AccountancyServices(IConfiguration configuration, Database database)
+        public AccountancyServices(IConfiguration configuration, Database database, Recognizer recognizer)
         {
             _configuration = configuration;
             _database = database;
+            _recognizer = recognizer;
         }
 
         public void IssueInvoice(Invoice invoice)
@@ -61,6 +65,7 @@ namespace SampleApp.Services
         public void SavePDF(IFormFile file)
         {
             UploadStreamToBlob(file.OpenReadStream(), file.FileName);
+
         }
 
         private void GeneratePDF(Invoice invoice)
@@ -81,7 +86,6 @@ namespace SampleApp.Services
 
             }
         }
-
         private void UploadStreamToBlob(Stream stream, string fileName)
         {
             string connectionString = _configuration["StorageAccount:ConnectionString"];
@@ -92,6 +96,16 @@ namespace SampleApp.Services
             blobHttpHeader.ContentType = "application/pdf";
 
             blob.UploadAsync(stream, blobHttpHeader).Wait();
+        }
+
+        public RecognizedFormCollection RegisterOutgoingInvoice(IFormFile file)
+        {
+            //SavePDF(file);
+            using var ms = new MemoryStream();
+            var stream = file.OpenReadStream();
+            stream.CopyTo(ms);
+            ms.Seek(0, SeekOrigin.Begin);
+            return _recognizer.Scan(ms);
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using Microsoft.Azure.CognitiveServices.FormRecognizer;
-using Microsoft.Azure.CognitiveServices.FormRecognizer.Models;
+﻿using Azure;
+using Azure.AI.FormRecognizer;
+using Azure.AI.FormRecognizer.Models;
+using Azure.AI.FormRecognizer.Training;
+using Microsoft.Azure.Management.Monitor.Models;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace SampleApp.Services.OCR
@@ -13,72 +14,66 @@ namespace SampleApp.Services.OCR
         public string SubscriptionKey { get; private set; }
         public string Endpoint { get; private set; }
 
+        public Guid ModelId { get; private set; }
         public string TrainingDataUrl { get; private set; }
 
-        public Recognizer(string subscriptionKey, string endpoint, string trainingDataUrl)
+        public Recognizer(string subscriptionKey, string endpoint, string trainingDataUrl, Guid modelId)
         {
             SubscriptionKey = subscriptionKey ?? throw new ArgumentNullException(nameof(subscriptionKey));
             Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-            TrainingDataUrl = endpoint ?? throw new ArgumentNullException(nameof(trainingDataUrl));
+            TrainingDataUrl = trainingDataUrl ?? throw new ArgumentNullException(nameof(trainingDataUrl));
+            ModelId = modelId;
         }
 
-        public async Task<AnalyzeResult> RecognizeForm(Stream pdfFormFile)
+        public Recognizer(RecognizerConfig config)
         {
-            var formClient = new FormRecognizerClient(new ApiKeyServiceClientCredentials(SubscriptionKey))
-            {
-                Endpoint = this.Endpoint
-            };
+            if(config==null)
+                throw new ArgumentNullException(nameof(config));
 
-            var modelId = await TrainModelAsync(formClient, TrainingDataUrl);
-            var result = await AnalyzePdfForm(formClient, modelId, pdfFormFile);
-            await DeleteModel(formClient, modelId);
-
-            return result;
+            SubscriptionKey = config.Key ?? throw new ArgumentNullException(nameof(config.Key));
+            Endpoint = config.Endpoint ?? throw new ArgumentNullException(nameof(config.Endpoint));
+            TrainingDataUrl = config.ModelUrl ?? throw new ArgumentNullException(nameof(config.ModelUrl));
+            ModelId = Guid.Parse(config.ModelId);
         }
 
-        private static async Task<Guid> TrainModelAsync(IFormRecognizerClient formClient, string trainingDataUrl)
+        public RecognizedFormCollection Scan(Stream file)
         {
-            if (!Uri.IsWellFormedUriString(trainingDataUrl, UriKind.Absolute))
-                return Guid.Empty;
+            var formClient = BuildFormRecognizerClient();
+            var forms = formClient
+                            .StartRecognizeCustomFormsAsync(ModelId.ToString(), file)
+                            .WaitForCompletionAsync()
+                            .Result.Value;
 
+            return forms;            
+        }
+
+        private FormRecognizerClient BuildFormRecognizerClient()
+        {
+            var credential = new AzureKeyCredential(SubscriptionKey);
+            var uri = new Uri(Endpoint);
+            var formClient = new FormRecognizerClient(uri, credential);
+
+            return formClient;
+        }
+
+        private Response<RecognizedFormCollection> AnalyzeForm(FormRecognizerClient formClient, Guid modelId, Stream formFile)
+        {
             try
             {
-                var result = await formClient.TrainCustomModelAsync(new TrainRequest(trainingDataUrl));
-                var model = await formClient.GetCustomModelAsync(result.ModelId);
+                var forms = formClient
+                                .StartRecognizeCustomFormsAsync(modelId.ToString(), formFile)
+                                .WaitForCompletionAsync()
+                                .Result;
 
-                return result.ModelId;
+                return forms;
             }
             catch (ErrorResponseException e)
             {
-                return Guid.Empty;
-            }
-        }
-
-        private async Task<AnalyzeResult> AnalyzePdfForm(IFormRecognizerClient formClient, Guid modelId, Stream pdfFormFile)
-        {
-
-            try
-            {
-                return await formClient.AnalyzeWithCustomModelAsync(modelId, pdfFormFile, contentType: "application/pdf");
-            }
-            catch (ErrorResponseException e)
-            {
-                return null;
+                throw;
             }
             catch (Exception ex)
             {
-                return null;
-            }
-        }
-
-        private static async Task DeleteModel(IFormRecognizerClient formClient, Guid modelId)
-        {
-            try
-            {
-                await formClient.DeleteCustomModelAsync(modelId);
-            }
-            catch (ErrorResponseException e)
-            {
+                throw;
             }
         }
     }
