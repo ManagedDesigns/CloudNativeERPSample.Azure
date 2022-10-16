@@ -58,22 +58,26 @@ namespace SampleApp.Services
 
         public Invoice RegisterIncomingInvoice(Stream stream, string fileName)
         {
+            var tx = _database.Database.BeginTransaction();
             try
             {
-                SavePDF(stream, fileName);
-
+                using var ms2 = new MemoryStream();
+                ms2.Seek(0, SeekOrigin.Begin);
+                SavePDF(ms2, fileName);            
+                
                 using var ms = new MemoryStream();
                 stream.CopyTo(ms);
                 ms.Seek(0, SeekOrigin.Begin);
 
-                var invoice = _recognizer.Scan(ms);
+                var invoice = _recognizer.Scan(ms).Result;
                 _database.Invoices.Add(invoice);
                 _database.SaveChanges();
-
+          
                 return invoice;
             }
             catch
             {
+                tx.Rollback();
                 throw;
             }
 
@@ -114,7 +118,5 @@ namespace SampleApp.Services
 
             blob.UploadAsync(stream, blobHttpHeader).Wait();
         }
-
- 
     }
 }

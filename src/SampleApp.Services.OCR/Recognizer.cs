@@ -22,12 +22,12 @@ namespace SampleApp.Services.OCR
             Endpoint = config.Endpoint ?? throw new ArgumentNullException(nameof(config.Endpoint));
         }
 
-        public Invoice Scan(Stream file)
+        public async Task<Invoice> Scan(Stream file)
         {
             var credential = new AzureKeyCredential(SubscriptionKey);
             var client = new DocumentAnalysisClient(new Uri(Endpoint), credential);
             
-            AnalyzeDocumentOperation operation = client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", file).Result;
+            AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", file);
             AnalyzeResult result = operation.Value;
             var invoice = BuildInvoice(result);
             
@@ -41,6 +41,16 @@ namespace SampleApp.Services.OCR
                 return null;
 
             var invoice = new Invoice();
+            
+            if (document.Fields.TryGetValue("InvoiceId", out DocumentField? invoiceIdField))
+            {
+                if (invoiceIdField.FieldType == DocumentFieldType.String)
+                {
+                    string invoiceId = invoiceIdField.Value.AsString();
+                    invoice.Number = invoiceId;
+                }
+            }            
+            
             if (document.Fields.TryGetValue("VendorName", out DocumentField? vendorNameField))
             {
                 if (vendorNameField.FieldType == DocumentFieldType.String)
@@ -58,7 +68,10 @@ namespace SampleApp.Services.OCR
                     invoice.CustomerName = customerName;
                 }
             }
-            
+
+
+
+            invoice.Description = "Lorrem ipsum";
             return invoice;
         }
     }
