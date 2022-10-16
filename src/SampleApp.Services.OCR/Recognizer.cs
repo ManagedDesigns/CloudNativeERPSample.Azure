@@ -55,26 +55,5 @@ namespace SampleApp.Services.OCR
 
             return formClient;
         }
-
-        private Response<RecognizedFormCollection> AnalyzeForm(FormRecognizerClient formClient, Guid modelId, Stream formFile)
-        {
-            try
-            {
-                var forms = formClient
-                                .StartRecognizeCustomFormsAsync(modelId.ToString(), formFile)
-                                .WaitForCompletionAsync()
-                                .Result;
-
-                return forms;
-            }
-            catch (ErrorResponseException e)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-        }
     }
 }
