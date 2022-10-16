@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Azure;
 using Azure.AI.FormRecognizer.DocumentAnalysis;
+using SampleApp.Data;
 
 namespace SampleApp.Services.OCR
 {
@@ -12,16 +13,6 @@ namespace SampleApp.Services.OCR
         public string SubscriptionKey { get; private set; }
         public string Endpoint { get; private set; }
 
-        //public Guid ModelId { get; private set; }
-        //public string TrainingDataUrl { get; private set; }
-
-        //public Recognizer(string subscriptionKey, string endpoint, string trainingDataUrl, Guid modelId)
-        //{
-        //    SubscriptionKey = subscriptionKey ?? throw new ArgumentNullException(nameof(subscriptionKey));
-        //    Endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-        //    //TrainingDataUrl = trainingDataUrl ?? throw new ArgumentNullException(nameof(trainingDataUrl));
-        //    //ModelId = modelId;
-        //}
         public Recognizer(RecognizerConfig config)
         {
             if (config == null)
@@ -29,23 +20,46 @@ namespace SampleApp.Services.OCR
 
             SubscriptionKey = config.Key ?? throw new ArgumentNullException(nameof(config.Key));
             Endpoint = config.Endpoint ?? throw new ArgumentNullException(nameof(config.Endpoint));
-            //TrainingDataUrl = config.ModelUrl ?? throw new ArgumentNullException(nameof(config.ModelUrl));
-            //ModelId = Guid.Parse(config.ModelId);
         }
 
-        public async Task<AnalyzeResult> Scan(Stream file)
+        public Invoice Scan(Stream file)
         {
             var credential = new AzureKeyCredential(SubscriptionKey);
             var client = new DocumentAnalysisClient(new Uri(Endpoint), credential);
             
-            // sample document
-            Uri invoiceUri = new Uri("https://raw.githubusercontent.com/Azure-Samples/cognitive-services-REST-api-samples/master/curl/form-recognizer/sample-invoice.pdf");
-            AnalyzeDocumentOperation operation = await client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", file);
-            //AnalyzeDocumentOperation operation = await client.AnalyzeDocumentFromUriAsync(WaitUntil.Completed, "prebuilt-invoice", invoiceUri);
-
+            AnalyzeDocumentOperation operation = client.AnalyzeDocumentAsync(WaitUntil.Completed, "prebuilt-invoice", file).Result;
             AnalyzeResult result = operation.Value;
+            var invoice = BuildInvoice(result);
+            
+            return invoice;
+        }
 
-            return result;
+        private Invoice BuildInvoice(AnalyzeResult result)
+        {            
+            AnalyzedDocument document = result.Documents[0] ?? null;
+            if (document == null)
+                return null;
+
+            var invoice = new Invoice();
+            if (document.Fields.TryGetValue("VendorName", out DocumentField? vendorNameField))
+            {
+                if (vendorNameField.FieldType == DocumentFieldType.String)
+                {
+                    string vendorName = vendorNameField.Value.AsString();
+                    invoice.VendorName = vendorName;
+                }
+            }
+
+            if (document.Fields.TryGetValue("CustomerName", out DocumentField? customerNameField))
+            {
+                if (customerNameField.FieldType == DocumentFieldType.String)
+                {                   
+                    string customerName = customerNameField.Value.AsString();
+                    invoice.CustomerName = customerName;
+                }
+            }
+            
+            return invoice;
         }
     }
 }

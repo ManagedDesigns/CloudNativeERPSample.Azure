@@ -56,6 +56,29 @@ namespace SampleApp.Services
             }
         }
 
+        public Invoice RegisterIncomingInvoice(Stream stream, string fileName)
+        {
+            try
+            {
+                SavePDF(stream, fileName);
+
+                using var ms = new MemoryStream();
+                stream.CopyTo(ms);
+                ms.Seek(0, SeekOrigin.Begin);
+
+                var invoice = _recognizer.Scan(ms);
+                _database.Invoices.Add(invoice);
+                _database.SaveChanges();
+
+                return invoice;
+            }
+            catch
+            {
+                throw;
+            }
+
+        }
+        
         public void SavePDF(Stream stream, string fileName)
         {
             UploadStreamToBlob(stream, fileName);
@@ -92,14 +115,6 @@ namespace SampleApp.Services
             blob.UploadAsync(stream, blobHttpHeader).Wait();
         }
 
-        public AnalyzeResult RegisterIncomingInvoice(Stream stream, string fileName)
-        {
-            SavePDF(stream, fileName);
-            using var ms = new MemoryStream();
-            stream.CopyTo(ms);
-            ms.Seek(0, SeekOrigin.Begin);
-            AnalyzeResult scan = _recognizer.Scan(ms).Result;
-            return scan;
-        }
+ 
     }
 }

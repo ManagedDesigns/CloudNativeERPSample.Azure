@@ -9,4 +9,8 @@
 	  <PackageReference Include="Azure.Core" Version="1.25.0" />
 	  <PackageReference Include="Azure.AI.FormRecognizer" Version="4.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SampleApp.Data\SampleApp.Data.csproj" />
+  </ItemGroup>
 </Project>

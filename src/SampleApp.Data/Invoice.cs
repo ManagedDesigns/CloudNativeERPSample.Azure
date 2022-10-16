@@ -16,6 +16,9 @@ namespace SampleApp.Data
         [MaxLength(200)]
         public string CustomerName { get; set; }
 
+        [MaxLength(200)]
+        public string VendorName { get; set; }
+
         [Required]
         public DateTime Date { get; set; }
 
