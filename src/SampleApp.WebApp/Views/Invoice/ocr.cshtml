@@ -1,22 +1,97 @@
-﻿@model Azure.AI.FormRecognizer.Models.RecognizedFormCollection
-@using Azure.AI.FormRecognizer.Models;
+﻿@using System.Collections.Generic;
+@using System.Linq;
+@using Azure
+@using Azure.AI.FormRecognizer.DocumentAnalysis
+@using SampleApp.WebApp
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model AnalyzeResult;
 @{
-    foreach (RecognizedForm form in Model)
+    
+    for (int i = 0; i < Model.Documents.Count; i++)
     {
-    <table class="table table-striped">
-        <tr>
-            <th>Field name</th>
-            <th>Value data</th>
-            <th>Confidence score</th>
-        </tr>
-        @foreach (FormField field in form.Fields.Values)
+        HttpContextAccessor.HttpContext.Response.WriteAsync($"Document {i}:");
+
+        AnalyzedDocument document = Model.Documents[i];
+
+        if (document.Fields.TryGetValue("VendorName", out DocumentField? vendorNameField))
         {
-            <tr>
-                <td>@field.Name</td>
-                <td>@field.ValueData?.Text</td>
-                <td>@field.Confidence</td>
-            </tr>
+            if (vendorNameField.FieldType == DocumentFieldType.String)
+            {
+                string vendorName = vendorNameField.Value.AsString();
+                HttpContextAccessor.HttpContext.Response.WriteAsync($"Vendor Name: '{vendorName}', with confidence {vendorNameField.Confidence}");
+            }
         }
-    </table>
+
+        if (document.Fields.TryGetValue("CustomerName", out DocumentField? customerNameField))
+        {
+            if (customerNameField.FieldType == DocumentFieldType.String)
+            {
+                string customerName = customerNameField.Value.AsString();
+                HttpContextAccessor.HttpContext.Response.WriteAsync($"Customer Name: '{customerName}', with confidence {customerNameField.Confidence}");
+            }
+        }
+
+        //if (document.Fields.TryGetValue("Items", out DocumentField? itemsField))
+        //{
+        //    if (itemsField.FieldType == DocumentFieldType.List)
+        //    {
+        //        foreach (DocumentField itemField in itemsField.AsList())
+        //        {
+        //            HttpContextAccessor.HttpContext.Response.WriteAsync("Item:");
+
+        //            if (itemField.FieldType == DocumentFieldType.Dictionary)
+        //            {
+        //                IReadOnlyDictionary<string, DocumentField> itemFields = itemField.AsDictionary();
+
+        //                if (itemFields.TryGetValue("Description", out DocumentField? itemDescriptionField))
+        //                {
+        //                    if (itemDescriptionField.FieldType == DocumentFieldType.String)
+        //                    {
+        //                        string itemDescription = itemDescriptionField.Value.AsString();
+
+        //                        HttpContextAccessor.HttpContext.Response.WriteAsync($"  Description: '{itemDescription}', with confidence {itemDescriptionField.Confidence}");
+        //                    }
+        //                }
+
+        //                if (itemFields.TryGetValue("Amount", out DocumentField? itemAmountField))
+        //                {
+        //                    if (itemAmountField.FieldType == DocumentFieldType.Currency)
+        //                    {
+        //                        CurrencyValue itemAmount = itemAmountField.AsCurrency();
+
+        //                        HttpContextAccessor.HttpContext.Response.WriteAsync($"  Amount: '{itemAmount.Symbol}{itemAmount.Amount}', with confidence {itemAmountField.Confidence}");
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
+
+        //if (document.Fields.TryGetValue("SubTotal", out DocumentField? subTotalField))
+        //{
+        //    if (subTotalField.FieldType == DocumentFieldType.Currency)
+        //    {
+        //        CurrencyValue subTotal = subTotalField.AsCurrency();
+        //        HttpContextAccessor.HttpContext.Response.WriteAsync($"Sub Total: '{subTotal.Symbol}{subTotal.Amount}', with confidence {subTotalField.Confidence}");
+        //    }
+        //}
+
+        //if (document.Fields.TryGetValue("TotalTax", out DocumentField? totalTaxField))
+        //{
+        //    if (totalTaxField.FieldType == DocumentFieldType.Currency)
+        //    {
+        //        CurrencyValue totalTax = totalTaxField.AsCurrency();
+        //        HttpContextAccessor.HttpContext.Response.WriteAsync($"Total Tax: '{totalTax.Symbol}{totalTax.Amount}', with confidence {totalTaxField.Confidence}");
+        //    }
+        //}
+
+        //if (document.Fields.TryGetValue("InvoiceTotal", out DocumentField? invoiceTotalField))
+        //{
+        //    if (invoiceTotalField.FieldType == DocumentFieldType.Currency)
+        //    {
+        //        CurrencyValue invoiceTotal = invoiceTotalField.AsCurrency();
+        //        HttpContextAccessor.HttpContext.Response.WriteAsync($"Invoice Total: '{invoiceTotal.Symbol}{invoiceTotal.Amount}', with confidence {invoiceTotalField.Confidence}");
+        //    }
+        //}
     }
 }

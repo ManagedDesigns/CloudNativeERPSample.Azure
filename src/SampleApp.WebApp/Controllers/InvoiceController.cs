@@ -144,7 +144,8 @@ namespace SampleApp.Controllers
         [HttpPost]
         public IActionResult Upload(IFormFile file, [FromServices] AccountancyServices accountancyServices)
         {
-            var model = accountancyServices.RegisterOutgoingInvoice(file);
+            var fileName = file.FileName; 
+            var model = accountancyServices.RegisterIncomingInvoice(file.OpenReadStream(), fileName);
             
             return View("ocr", model);
         }
