@@ -1,8 +1,0 @@
-{
-  "$kind": "Microsoft.MultiLanguageRecognizer",
-  "id": "LUIS_SampleAppBot",
-  "recognizers": {
-    "en-us": "SampleAppBot.en-us.lu",
-    "": "SampleAppBot.en-us.lu"
-  }
-}
